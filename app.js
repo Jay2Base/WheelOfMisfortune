@@ -13,6 +13,11 @@ const restartButton = document.getElementById("restartButton");
 const resultText = document.getElementById("resultText");
 const remainingText = document.getElementById("remainingText");
 const errorText = document.getElementById("errorText");
+const winnerModal = document.getElementById("winnerModal");
+const winnerModalText = document.getElementById("winnerModalText");
+const closeWinnerModalButton = document.getElementById("closeWinnerModalButton");
+const confettiCanvas = document.getElementById("confettiCanvas");
+const confettiCtx = confettiCanvas.getContext("2d");
 
 const BASE_COLORS = [
   "#f94144", "#f3722c", "#f8961e", "#f9844a", "#f9c74f",
@@ -24,6 +29,88 @@ let rotation = 0;
 let spinning = false;
 let selectedItem = "";
 let animationId = 0;
+let confettiAnimationId = 0;
+
+function resizeConfettiCanvas() {
+  confettiCanvas.width = window.innerWidth;
+  confettiCanvas.height = window.innerHeight;
+}
+
+function showWinnerModal(winner) {
+  winnerModalText.textContent = winner;
+  winnerModal.classList.remove("hidden");
+  winnerModal.classList.remove("show");
+  // Force reflow so the pop animation restarts each spin.
+  void winnerModal.offsetWidth;
+  winnerModal.classList.add("show");
+}
+
+function hideWinnerModal() {
+  winnerModal.classList.remove("show");
+  winnerModal.classList.add("hidden");
+}
+
+function launchConfetti() {
+  resizeConfettiCanvas();
+  confettiCanvas.classList.remove("hidden");
+
+  const pieces = [];
+  const count = 220;
+  const colors = ["#ff4f8b", "#ffdf00", "#3ed9ff", "#8eff6a", "#ffffff", "#9f63ff"];
+
+  for (let index = 0; index < count; index += 1) {
+    pieces.push({
+      x: Math.random() * confettiCanvas.width,
+      y: -30 - Math.random() * confettiCanvas.height * 0.6,
+      w: 6 + Math.random() * 8,
+      h: 10 + Math.random() * 14,
+      vy: 180 + Math.random() * 220,
+      vx: -80 + Math.random() * 160,
+      gravity: 420 + Math.random() * 180,
+      tilt: Math.random() * Math.PI,
+      spin: -8 + Math.random() * 16,
+      color: colors[index % colors.length]
+    });
+  }
+
+  const start = performance.now();
+  let last = start;
+  const durationMs = 3200;
+
+  function frame(now) {
+    const elapsed = now - start;
+    const dt = Math.min((now - last) / 1000, 0.04);
+    last = now;
+
+    confettiCtx.clearRect(0, 0, confettiCanvas.width, confettiCanvas.height);
+
+    for (const piece of pieces) {
+      piece.vy += piece.gravity * dt;
+      piece.x += piece.vx * dt;
+      piece.y += piece.vy * dt;
+      piece.tilt += piece.spin * dt;
+
+      confettiCtx.save();
+      confettiCtx.translate(piece.x, piece.y);
+      confettiCtx.rotate(piece.tilt);
+      confettiCtx.fillStyle = piece.color;
+      confettiCtx.fillRect(-piece.w / 2, -piece.h / 2, piece.w, piece.h);
+      confettiCtx.restore();
+    }
+
+    if (elapsed < durationMs) {
+      confettiAnimationId = requestAnimationFrame(frame);
+      return;
+    }
+
+    cancelAnimationFrame(confettiAnimationId);
+    confettiCtx.clearRect(0, 0, confettiCanvas.width, confettiCanvas.height);
+    confettiCanvas.classList.add("hidden");
+  }
+
+  cancelAnimationFrame(confettiAnimationId);
+  confettiAnimationId = requestAnimationFrame(frame);
+}
 
 function parseInput(text) {
   return text
@@ -136,6 +223,8 @@ function animateSpin(initialVelocity) {
     const winnerIndex = getWinnerIndex();
     selectedItem = items[winnerIndex];
     resultText.textContent = `${selectedItem}`;
+    showWinnerModal(selectedItem);
+    launchConfetti();
 
     if (items.length > 1) {
       remainingText.textContent = `${items.length - 1} remain.`;
@@ -160,6 +249,7 @@ function startSpin() {
   setError("");
   resultText.textContent = "";
   remainingText.textContent = "";
+  hideWinnerModal();
   spinButton.disabled = true;
 
   // Angular velocity in rad/s, then uniformly decelerated to zero in ~10 seconds.
@@ -194,6 +284,7 @@ function nextSpin() {
   selectedItem = "";
 
   if (!items.length) {
+    hideWinnerModal();
     drawWheel();
     setError("Wheel is empty. Enter new items to continue.");
     showMode(setupMode);
@@ -201,12 +292,14 @@ function nextSpin() {
   }
 
   drawWheel();
+  hideWinnerModal();
   spinButton.disabled = false;
   showMode(playMode);
 }
 
 function restart() {
   cancelAnimationFrame(animationId);
+  cancelAnimationFrame(confettiAnimationId);
   spinning = false;
   selectedItem = "";
   items = [];
@@ -214,6 +307,9 @@ function restart() {
   resultText.textContent = "";
   remainingText.textContent = "";
   setError("");
+  hideWinnerModal();
+  confettiCtx.clearRect(0, 0, confettiCanvas.width, confettiCanvas.height);
+  confettiCanvas.classList.add("hidden");
   drawWheel();
   showMode(setupMode);
 }
@@ -222,5 +318,8 @@ startButton.addEventListener("click", buildWheel);
 spinButton.addEventListener("click", startSpin);
 nextSpinButton.addEventListener("click", nextSpin);
 restartButton.addEventListener("click", restart);
+closeWinnerModalButton.addEventListener("click", hideWinnerModal);
+window.addEventListener("resize", resizeConfettiCanvas);
 
 drawWheel();
+resizeConfettiCanvas();

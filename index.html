@@ -47,6 +47,17 @@
     </section>
   </main>
 
+  <div id="winnerModal" class="winner-modal hidden" role="dialog" aria-modal="true" aria-labelledby="winnerTitle">
+    <div class="winner-card">
+      <button id="closeWinnerModalButton" class="close-winner-modal" type="button" aria-label="Close winner modal">x</button>
+      <p class="winner-tag">BIG WINNER</p>
+      <h2 id="winnerTitle" class="winner-title">Your Prize</h2>
+      <p id="winnerModalText" class="winner-value"></p>
+    </div>
+  </div>
+
+  <canvas id="confettiCanvas" class="confetti-canvas hidden" aria-hidden="true"></canvas>
+
   <script src="./app.js"></script>
 </body>
 </html>
