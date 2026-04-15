@@ -13,8 +13,15 @@
   box-sizing: border-box;
 }
 
+html,
+body {
+  width: 100%;
+  overflow-x: hidden;
+}
+
 body {
   margin: 0;
+  padding: clamp(0.5rem, 2vw, 1.25rem);
   min-height: 100vh;
   font-family: "Segoe UI", Tahoma, Geneva, Verdana, sans-serif;
   background: radial-gradient(circle at top, #102a88, var(--bg));
@@ -22,14 +29,16 @@ body {
 }
 
 .app {
-  width: min(1200px, 96vw);
-  margin: 2rem auto;
+  width: min(1240px, 100%);
+  margin: 0 auto;
   display: grid;
-  gap: 1.5rem;
+  gap: clamp(0.9rem, 2vw, 1.5rem);
   grid-template-columns: minmax(320px, 420px) 1fr;
+  align-items: start;
 }
 
 .panel {
+  min-width: 0;
   background: linear-gradient(160deg, rgba(9, 16, 44, 0.96), rgba(3, 7, 20, 0.97));
   border: 1px solid rgba(255, 255, 255, 0.1);
   border-radius: 16px;
@@ -109,6 +118,7 @@ button:disabled {
 }
 
 .wheel-area {
+  min-width: 0;
   display: grid;
   place-items: center;
   background: linear-gradient(170deg, rgba(13, 25, 71, 0.72), rgba(2, 5, 14, 0.82));
@@ -118,11 +128,11 @@ button:disabled {
 
 .wheel-frame {
   position: relative;
-  width: min(85vw, 600px);
+  width: min(100%, 680px);
   aspect-ratio: 1 / 1;
   display: grid;
   place-items: center;
-  padding: 1rem;
+  padding: clamp(0.5rem, 1.8vw, 1rem);
 }
 
 canvas {
@@ -275,8 +285,8 @@ canvas {
   position: fixed;
   inset: 0;
   z-index: 35;
-  width: 100vw;
-  height: 100vh;
+  width: 100%;
+  height: 100%;
   pointer-events: none;
   background: transparent;
 }
