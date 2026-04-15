@@ -131,6 +131,12 @@ function setError(message) {
   errorText.textContent = message;
 }
 
+function setResultText(message) {
+  if (resultText) {
+    resultText.textContent = message;
+  }
+}
+
 function showMode(mode) {
   setupMode.classList.add("hidden");
   playMode.classList.add("hidden");
@@ -234,7 +240,7 @@ function animateSpin(initialVelocity) {
 
     const winnerIndex = getWinnerIndex();
     selectedItem = items[winnerIndex];
-    resultText.textContent = `${selectedItem}`;
+    setResultText(`${selectedItem}`);
     showWinnerModal(selectedItem);
     launchConfetti();
 
@@ -259,7 +265,7 @@ function startSpin() {
 
   spinning = true;
   setError("");
-  resultText.textContent = "";
+  setResultText("");
   remainingText.textContent = "";
   hideWinnerModal();
   spinButton.disabled = true;
@@ -316,7 +322,7 @@ function restart() {
   selectedItem = "";
   items = [];
   rotation = 0;
-  resultText.textContent = "";
+  setResultText("");
   remainingText.textContent = "";
   setError("");
   hideWinnerModal();
