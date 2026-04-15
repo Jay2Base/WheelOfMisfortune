@@ -135,10 +135,10 @@ function animateSpin(initialVelocity) {
 
     const winnerIndex = getWinnerIndex();
     selectedItem = items[winnerIndex];
-    resultText.textContent = `Selected: ${selectedItem}`;
+    resultText.textContent = `${selectedItem}`;
 
     if (items.length > 1) {
-      remainingText.textContent = `${items.length - 1} items remain.`;
+      remainingText.textContent = `${items.length - 1} remain.`;
       nextSpinButton.disabled = false;
     } else {
       remainingText.textContent = "No items left after this spin. Start over.";
