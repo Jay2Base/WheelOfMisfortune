@@ -20,8 +20,16 @@ const confettiCanvas = document.getElementById("confettiCanvas");
 const confettiCtx = confettiCanvas.getContext("2d");
 
 const BASE_COLORS = [
-  "#f94144", "#f3722c", "#f8961e", "#f9844a", "#f9c74f",
-  "#90be6d", "#43aa8b", "#577590", "#277da1", "#6a4c93"
+  "#ffffff",
+  "#d8e3ff",
+  "#a8c0ff",
+  "#6f94ff",
+  "#4169e1",
+  "#1f3d9f",
+  "#0b1f63",
+  "#050f33",
+  "#0f0f14",
+  "#000000"
 ];
 
 let items = [];
@@ -56,7 +64,7 @@ function launchConfetti() {
 
   const pieces = [];
   const count = 220;
-  const colors = ["#ff4f8b", "#ffdf00", "#3ed9ff", "#8eff6a", "#ffffff", "#9f63ff"];
+  const colors = ["#ffffff", "#dbe5ff", "#a8bfff", "#6c8fff", "#4169e1", "#132a78"];
 
   for (let index = 0; index < count; index += 1) {
     pieces.push({
@@ -160,12 +168,16 @@ function drawWheel() {
     ctx.closePath();
     ctx.fillStyle = BASE_COLORS[index % BASE_COLORS.length];
     ctx.fill();
+    ctx.strokeStyle = "rgba(255, 255, 255, 0.75)";
+    ctx.lineWidth = 2;
+    ctx.stroke();
 
     ctx.save();
     ctx.translate(center, center);
     ctx.rotate(start + sliceAngle / 2);
     ctx.textAlign = "right";
-    ctx.fillStyle = "#ffffff";
+    const shadeIndex = index % BASE_COLORS.length;
+    ctx.fillStyle = shadeIndex < 5 ? "#071238" : "#ffffff";
     ctx.font = "700 20px Segoe UI";
     const label = items[index];
     const clipped = label.length > 16 ? `${label.slice(0, 16)}...` : label;

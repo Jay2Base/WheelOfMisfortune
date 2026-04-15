@@ -1,12 +1,12 @@
 :root {
   color-scheme: dark;
-  --bg: #0f1320;
-  --panel: #1a2238;
-  --accent: #ffbf00;
-  --accent-2: #6a89ff;
-  --text: #f4f7ff;
-  --muted: #b9c2df;
-  --danger: #ff6e6e;
+  --bg: #02040b;
+  --panel: #0b1329;
+  --accent: #0d1c5c;
+  --accent-2: #4169e1;
+  --text: #ffffff;
+  --muted: #cbd5ff;
+  --danger: #9bb1ff;
 }
 
 * {
@@ -17,7 +17,7 @@ body {
   margin: 0;
   min-height: 100vh;
   font-family: "Segoe UI", Tahoma, Geneva, Verdana, sans-serif;
-  background: radial-gradient(circle at top, #1b2340, var(--bg));
+  background: radial-gradient(circle at top, #102a88, var(--bg));
   color: var(--text);
 }
 
@@ -30,7 +30,7 @@ body {
 }
 
 .panel {
-  background: rgba(26, 34, 56, 0.95);
+  background: linear-gradient(160deg, rgba(9, 16, 44, 0.96), rgba(3, 7, 20, 0.97));
   border: 1px solid rgba(255, 255, 255, 0.1);
   border-radius: 16px;
   padding: 1rem 1.25rem;
@@ -58,8 +58,8 @@ textarea {
   width: 100%;
   resize: vertical;
   border-radius: 10px;
-  border: 1px solid rgba(255, 255, 255, 0.2);
-  background: #11182e;
+  border: 1px solid rgba(151, 177, 255, 0.35);
+  background: #050a1d;
   color: var(--text);
   padding: 0.7rem;
   font-size: 1rem;
@@ -80,13 +80,13 @@ button:disabled {
 }
 
 .primary {
-  background: var(--accent-2);
+  background: linear-gradient(135deg, #264fcc, #5f82ff);
   color: var(--text);
 }
 
 .secondary {
-  background: var(--accent);
-  color: #202020;
+  background: linear-gradient(135deg, #ffffff, #dce6ff);
+  color: #07123a;
   font-weight: 700;
 }
 
@@ -103,16 +103,16 @@ button:disabled {
   border-radius: 50%;
   font-size: 2rem;
   font-weight: 900;
-  background: linear-gradient(160deg, #ffe16f, #f2aa00);
-  color: #1b1b1b;
-  box-shadow: 0 10px 28px rgba(0, 0, 0, 0.4);
+  background: linear-gradient(160deg, #ffffff, #9db5ff 45%, #4169e1);
+  color: #030611;
+  box-shadow: 0 12px 30px rgba(13, 33, 109, 0.65);
 }
 
 .wheel-area {
   display: grid;
   place-items: center;
-  background: rgba(26, 34, 56, 0.65);
-  border: 1px solid rgba(255, 255, 255, 0.1);
+  background: linear-gradient(170deg, rgba(13, 25, 71, 0.72), rgba(2, 5, 14, 0.82));
+  border: 1px solid rgba(112, 139, 236, 0.28);
   border-radius: 16px;
 }
 
@@ -130,9 +130,9 @@ canvas {
   height: 100%;
   max-width: 560px;
   max-height: 560px;
-  background: #0d1222;
+  background: #030811;
   border-radius: 50%;
-  border: 8px solid #dbe0f7;
+  border: 8px solid #f5f8ff;
 }
 
 .pointer {
@@ -144,7 +144,7 @@ canvas {
   height: 0;
   border-left: 18px solid transparent;
   border-right: 18px solid transparent;
-  border-top: 42px solid #ff4d4d;
+  border-top: 42px solid #ffffff;
   z-index: 3;
   filter: drop-shadow(0 4px 6px rgba(0, 0, 0, 0.5));
 }
@@ -161,7 +161,7 @@ canvas {
   font-size: 2rem;
   font-weight: 800;
   margin: 0.5rem 0;
-  color: #ffe16f;
+  color: #ffffff;
 }
 
 .remaining,
@@ -182,11 +182,15 @@ canvas {
   place-items: center;
   padding: 3vw;
   background:
-    radial-gradient(circle at 20% 20%, rgba(255, 230, 0, 0.4), transparent 40%),
-    radial-gradient(circle at 80% 25%, rgba(255, 65, 108, 0.4), transparent 40%),
-    radial-gradient(circle at 50% 90%, rgba(53, 193, 255, 0.35), transparent 45%),
-    rgba(8, 10, 20, 0.72);
+    radial-gradient(circle at 20% 20%, rgba(125, 156, 255, 0.35), transparent 40%),
+    radial-gradient(circle at 80% 25%, rgba(255, 255, 255, 0.18), transparent 42%),
+    radial-gradient(circle at 50% 90%, rgba(41, 78, 201, 0.32), transparent 45%),
+    rgba(2, 4, 12, 0.74);
   backdrop-filter: blur(4px);
+}
+
+.winner-modal.hidden {
+  display: none;
 }
 
 .winner-card {
@@ -194,13 +198,13 @@ canvas {
   width: min(92vw, 980px);
   min-height: min(72vh, 640px);
   border-radius: 26px;
-  border: 8px solid #fff2bf;
+  border: 8px solid #ffffff;
   background:
-    linear-gradient(130deg, #ff4f8b 0%, #ffb347 35%, #ffe66d 50%, #5fd5ff 75%, #8b5cff 100%);
+    linear-gradient(130deg, #02040b 0%, #0f204f 32%, #4169e1 60%, #dde6ff 100%);
   box-shadow:
-    0 24px 60px rgba(0, 0, 0, 0.55),
-    0 0 30px rgba(255, 255, 255, 0.4),
-    inset 0 0 24px rgba(255, 255, 255, 0.45);
+    0 24px 60px rgba(0, 0, 0, 0.7),
+    0 0 30px rgba(141, 169, 255, 0.45),
+    inset 0 0 24px rgba(255, 255, 255, 0.22);
   display: grid;
   place-content: center;
   text-align: center;
@@ -218,13 +222,13 @@ canvas {
   height: 52px;
   margin: 0;
   border-radius: 50%;
-  border: 3px solid #fff8d3;
-  background: linear-gradient(140deg, #ff4b77, #ff8f55);
-  color: #fff;
+  border: 3px solid #ffffff;
+  background: linear-gradient(145deg, #4169e1, #0b1f63);
+  color: #ffffff;
   font-size: 1.8rem;
   font-weight: 900;
   line-height: 1;
-  box-shadow: 0 8px 18px rgba(35, 10, 57, 0.35);
+  box-shadow: 0 8px 18px rgba(2, 8, 30, 0.55);
 }
 
 .close-winner-modal:hover {
@@ -243,14 +247,14 @@ canvas {
 .winner-tag {
   margin: 0;
   letter-spacing: 0.18em;
-  color: #22192e;
+  color: #f2f6ff;
   font-size: clamp(0.9rem, 2vw, 1.3rem);
   font-weight: 900;
 }
 
 .winner-title {
   margin: 0;
-  color: #1a1231;
+  color: #ffffff;
   text-transform: uppercase;
   letter-spacing: 0.07em;
   font-size: clamp(1.3rem, 3.5vw, 2.6rem);
@@ -262,18 +266,19 @@ canvas {
   font-weight: 900;
   color: #ffffff;
   text-shadow:
-    0 6px 0 rgba(47, 17, 87, 0.45),
-    0 16px 30px rgba(23, 8, 48, 0.7);
+    0 6px 0 rgba(8, 16, 44, 0.7),
+    0 16px 30px rgba(1, 4, 16, 0.8);
   word-break: break-word;
 }
 
 .confetti-canvas {
   position: fixed;
   inset: 0;
-  z-index: 50;
+  z-index: 35;
   width: 100vw;
   height: 100vh;
   pointer-events: none;
+  background: transparent;
 }
 
 @keyframes modal-pop {
