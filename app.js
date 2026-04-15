@@ -32,12 +32,24 @@ const BASE_COLORS = [
   "#000000"
 ];
 
+const SPIN_MUSIC_URL = "https://commons.wikimedia.org/wiki/Special:FilePath/Musopen_-_In_the_Hall_Of_The_Mountain_King.ogg";
+const REVEAL_SOUND_URL = "https://commons.wikimedia.org/wiki/Special:FilePath/CullamBruce-Lockhart--Dawning_Fanfare.oga";
+
 let items = [];
 let rotation = 0;
 let spinning = false;
 let selectedItem = "";
 let animationId = 0;
 let confettiAnimationId = 0;
+let revealStopTimer = 0;
+const spinMusic = new Audio(SPIN_MUSIC_URL);
+const revealSound = new Audio(REVEAL_SOUND_URL);
+
+spinMusic.loop = true;
+spinMusic.preload = "auto";
+spinMusic.volume = 0.34;
+revealSound.preload = "auto";
+revealSound.volume = 0.6;
 
 function resizeConfettiCanvas() {
   confettiCanvas.width = window.innerWidth;
@@ -56,6 +68,27 @@ function showWinnerModal(winner) {
 function hideWinnerModal() {
   winnerModal.classList.remove("show");
   winnerModal.classList.add("hidden");
+}
+
+function playSpinMusic() {
+  spinMusic.currentTime = 0;
+  spinMusic.play().catch(() => {});
+}
+
+function stopSpinMusic() {
+  spinMusic.pause();
+  spinMusic.currentTime = 0;
+}
+
+function playRevealSound() {
+  window.clearTimeout(revealStopTimer);
+  revealSound.currentTime = 0;
+  revealSound.play().catch(() => {});
+  // Keep reveal as a short "ta-da" effect instead of long music.
+  revealStopTimer = window.setTimeout(() => {
+    revealSound.pause();
+    revealSound.currentTime = 0;
+  }, 2400);
 }
 
 function launchConfetti() {
@@ -241,6 +274,8 @@ function animateSpin(initialVelocity) {
     const winnerIndex = getWinnerIndex();
     selectedItem = items[winnerIndex];
     setResultText(`${selectedItem}`);
+    stopSpinMusic();
+    playRevealSound();
     showWinnerModal(selectedItem);
     launchConfetti();
 
@@ -269,6 +304,8 @@ function startSpin() {
   remainingText.textContent = "";
   hideWinnerModal();
   spinButton.disabled = true;
+  stopSpinMusic();
+  playSpinMusic();
 
   // Angular velocity in rad/s, then uniformly decelerated to zero in ~10 seconds.
   const initialVelocity = 8 + Math.random() * 4;
@@ -300,6 +337,7 @@ function nextSpin() {
   items = removeOneItem(items, selectedItem);
   itemInput.value = items.join("\n");
   selectedItem = "";
+  stopSpinMusic();
 
   if (!items.length) {
     hideWinnerModal();
@@ -318,6 +356,10 @@ function nextSpin() {
 function restart() {
   cancelAnimationFrame(animationId);
   cancelAnimationFrame(confettiAnimationId);
+  stopSpinMusic();
+  window.clearTimeout(revealStopTimer);
+  revealSound.pause();
+  revealSound.currentTime = 0;
   spinning = false;
   selectedItem = "";
   items = [];
