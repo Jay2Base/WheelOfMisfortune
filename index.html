@@ -1,0 +1,52 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Wheel of Misfortune</title>
+  <link rel="stylesheet" href="./styles.css">
+</head>
+<body>
+  <main class="app">
+    <section class="panel">
+      <h1>Wheel of Misfortune</h1>
+      <p class="subtitle">Add your items, spin, and remove winners each round.</p>
+
+      <div class="mode mode-setup" id="setupMode">
+        <h2>Mode 1: Setup</h2>
+        <label for="itemInput">Enter one item per line:</label>
+        <textarea
+          id="itemInput"
+          rows="10"
+          placeholder="Option A&#10;Option B&#10;Option C"
+        ></textarea>
+        <button id="startButton" class="primary">Build Wheel</button>
+      </div>
+
+      <div class="mode mode-play hidden" id="playMode">
+        <h2>Mode 2: Play</h2>
+        <button id="spinButton" class="spin-button">SPIN</button>
+      </div>
+
+      <div class="mode mode-reset hidden" id="resetMode">
+        <h2>Mode 3: Reset</h2>
+        <p id="resultText" class="result"></p>
+        <p id="remainingText" class="remaining"></p>
+        <button id="nextSpinButton" class="secondary">Spin Again</button>
+        <button id="restartButton" class="ghost">Start Over</button>
+      </div>
+
+      <p id="errorText" class="error" aria-live="polite"></p>
+    </section>
+
+    <section class="wheel-area">
+      <div class="wheel-frame">
+        <div class="pointer" aria-hidden="true"></div>
+        <canvas id="wheelCanvas" width="560" height="560" aria-label="Wheel"></canvas>
+      </div>
+    </section>
+  </main>
+
+  <script src="./app.js"></script>
+</body>
+</html>
