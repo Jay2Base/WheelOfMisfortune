@@ -3,18 +3,17 @@ const ctx = canvas.getContext("2d");
 
 const setupMode = document.getElementById("setupMode");
 const playMode = document.getElementById("playMode");
-const resetMode = document.getElementById("resetMode");
 
-const itemInput = document.getElementById("itemInput");
+const csvInput = document.getElementById("csvInput");
 const startButton = document.getElementById("startButton");
 const spinButton = document.getElementById("spinButton");
-const nextSpinButton = document.getElementById("nextSpinButton");
-const restartButton = document.getElementById("restartButton");
-const resultText = document.getElementById("resultText");
+const restartLink = document.getElementById("restartLink");
+const previousPrizeText = document.getElementById("previousPrizeText");
 const remainingText = document.getElementById("remainingText");
 const errorText = document.getElementById("errorText");
 const winnerModal = document.getElementById("winnerModal");
 const winnerModalText = document.getElementById("winnerModalText");
+const winnerModalDescription = document.getElementById("winnerModalDescription");
 const closeWinnerModalButton = document.getElementById("closeWinnerModalButton");
 const confettiCanvas = document.getElementById("confettiCanvas");
 const confettiCtx = confettiCanvas.getContext("2d");
@@ -35,10 +34,10 @@ const BASE_COLORS = [
 const SPIN_MUSIC_URL = "./assets/phatplamet.mp3";
 const REVEAL_SOUND_URL = "https://commons.wikimedia.org/wiki/Special:FilePath/CullamBruce-Lockhart--Dawning_Fanfare.oga";
 
-let items = [];
+let entries = [];
 let rotation = 0;
 let spinning = false;
-let selectedItem = "";
+let selectedEntry = null;
 let animationId = 0;
 let confettiAnimationId = 0;
 let revealStopTimer = 0;
@@ -56,8 +55,9 @@ function resizeConfettiCanvas() {
   confettiCanvas.height = window.innerHeight;
 }
 
-function showWinnerModal(winner) {
-  winnerModalText.textContent = winner;
+function showWinnerModal(entry) {
+  winnerModalText.textContent = entry.name;
+  winnerModalDescription.textContent = entry.description || "";
   winnerModal.classList.remove("hidden");
   winnerModal.classList.remove("show");
   // Force reflow so the pop animation restarts each spin.
@@ -68,6 +68,7 @@ function showWinnerModal(winner) {
 function hideWinnerModal() {
   winnerModal.classList.remove("show");
   winnerModal.classList.add("hidden");
+  winnerModalDescription.textContent = "";
 }
 
 function playSpinMusic() {
@@ -153,11 +154,87 @@ function launchConfetti() {
   confettiAnimationId = requestAnimationFrame(frame);
 }
 
-function parseInput(text) {
-  return text
-    .split(/\r?\n/)
-    .map((value) => value.trim())
-    .filter(Boolean);
+function parseCsvText(csvText) {
+  const rows = [];
+  let row = [];
+  let cell = "";
+  let inQuotes = false;
+
+  for (let idx = 0; idx < csvText.length; idx += 1) {
+    const char = csvText[idx];
+    const nextChar = csvText[idx + 1];
+
+    if (char === "\"") {
+      if (inQuotes && nextChar === "\"") {
+        cell += "\"";
+        idx += 1;
+      } else {
+        inQuotes = !inQuotes;
+      }
+      continue;
+    }
+
+    if (!inQuotes && char === ",") {
+      row.push(cell.trim());
+      cell = "";
+      continue;
+    }
+
+    if (!inQuotes && (char === "\n" || char === "\r")) {
+      if (char === "\r" && nextChar === "\n") {
+        idx += 1;
+      }
+      row.push(cell.trim());
+      rows.push(row);
+      row = [];
+      cell = "";
+      continue;
+    }
+
+    cell += char;
+  }
+
+  if (cell.length > 0 || row.length > 0) {
+    row.push(cell.trim());
+    rows.push(row);
+  }
+
+  if (!rows.length) {
+    throw new Error("CSV is empty.");
+  }
+
+  const header = rows[0];
+  if (header.length !== 2 || header[0] !== "Name" || header[1] !== "Description") {
+    throw new Error("CSV must have exactly these headers in order: Name,Description.");
+  }
+
+  const parsedEntries = [];
+  for (let index = 1; index < rows.length; index += 1) {
+    const current = rows[index];
+    if (current.length === 1 && current[0] === "") {
+      continue;
+    }
+    if (current.length !== 2) {
+      throw new Error(`Row ${index + 1} is invalid. Each row must have Name and Description.`);
+    }
+    const name = current[0].trim();
+    const description = current[1].trim();
+    if (!name) {
+      throw new Error(`Row ${index + 1} is invalid. Name cannot be empty.`);
+    }
+    parsedEntries.push({ name, description });
+  }
+
+  return parsedEntries;
+}
+
+function readCsvFile(file) {
+  return new Promise((resolve, reject) => {
+    const reader = new FileReader();
+    reader.onload = () => resolve(String(reader.result || ""));
+    reader.onerror = () => reject(new Error("Unable to read the CSV file."));
+    reader.readAsText(file);
+  });
 }
 
 function setError(message) {
@@ -165,15 +242,15 @@ function setError(message) {
 }
 
 function setResultText(message) {
-  if (resultText) {
-    resultText.textContent = message;
+  if (previousPrizeText) {
+    previousPrizeText.textContent = message ? `Previous prize: ${message}` : "";
+    previousPrizeText.classList.toggle("hidden", !message);
   }
 }
 
 function showMode(mode) {
   setupMode.classList.add("hidden");
   playMode.classList.add("hidden");
-  resetMode.classList.add("hidden");
   mode.classList.remove("hidden");
 }
 
@@ -184,7 +261,7 @@ function drawWheel() {
 
   ctx.clearRect(0, 0, size, size);
 
-  if (!items.length) {
+  if (!entries.length) {
     ctx.save();
     ctx.translate(center, center);
     ctx.fillStyle = "#dbe0f7";
@@ -195,9 +272,9 @@ function drawWheel() {
     return;
   }
 
-  const sliceAngle = (Math.PI * 2) / items.length;
+  const sliceAngle = (Math.PI * 2) / entries.length;
 
-  for (let index = 0; index < items.length; index += 1) {
+  for (let index = 0; index < entries.length; index += 1) {
     const start = rotation + index * sliceAngle - Math.PI / 2;
     const end = start + sliceAngle;
 
@@ -218,7 +295,7 @@ function drawWheel() {
     const shadeIndex = index % BASE_COLORS.length;
     ctx.fillStyle = shadeIndex < 5 ? "#071238" : "#ffffff";
     ctx.font = "700 20px Segoe UI";
-    const label = items[index];
+    const label = entries[index].name;
     const clipped = label.length > 16 ? `${label.slice(0, 16)}...` : label;
     ctx.fillText(clipped, radius - 12, 7);
     ctx.restore();
@@ -232,13 +309,16 @@ function drawWheel() {
 
 function getWinnerIndex() {
   const fullCircle = Math.PI * 2;
-  const normalized = ((rotation % fullCircle) + fullCircle) % fullCircle;
-  const pointerAngle = (Math.PI * 1.5 - normalized + fullCircle) % fullCircle;
-  const sliceAngle = fullCircle / items.length;
-  return Math.floor(pointerAngle / sliceAngle);
+  const normalizedRotation = ((rotation % fullCircle) + fullCircle) % fullCircle;
+  const sliceAngle = fullCircle / entries.length;
+  // Pointer is fixed at top (-90deg). In wheel-local space that is equivalent
+  // to selecting the segment at angle -rotation (mod full circle).
+  const pointerInWheelSpace = (fullCircle - normalizedRotation) % fullCircle;
+  const epsilon = 1e-9;
+  return Math.floor((pointerInWheelSpace + epsilon) / sliceAngle) % entries.length;
 }
 
-function removeOneItem(list, target) {
+function removeOneEntry(list, target) {
   let removed = false;
   return list.filter((entry) => {
     if (!removed && entry === target) {
@@ -272,29 +352,33 @@ function animateSpin(initialVelocity) {
     cancelAnimationFrame(animationId);
 
     const winnerIndex = getWinnerIndex();
-    selectedItem = items[winnerIndex];
-    setResultText(`${selectedItem}`);
+    selectedEntry = entries[winnerIndex];
+    setResultText(selectedEntry.name);
     stopSpinMusic();
     playRevealSound();
-    showWinnerModal(selectedItem);
+    showWinnerModal(selectedEntry);
     launchConfetti();
 
-    if (items.length > 1) {
-      remainingText.textContent = `${items.length - 1} remain.`;
-      nextSpinButton.disabled = false;
-    } else {
-      remainingText.textContent = "No items left after this spin. Start over.";
-      nextSpinButton.disabled = true;
+    entries = removeOneEntry(entries, selectedEntry);
+    if (entries.length > 0) {
+      remainingText.textContent = `${entries.length} remaining`;
+      remainingText.classList.remove("hidden");
+      spinButton.disabled = false;
+      showMode(playMode);
+      return;
     }
 
-    showMode(resetMode);
+    remainingText.textContent = "No items left. Upload a new CSV or Start Over.";
+    remainingText.classList.remove("hidden");
+    spinButton.disabled = true;
+    showMode(playMode);
   }
 
   animationId = requestAnimationFrame(frame);
 }
 
 function startSpin() {
-  if (spinning || !items.length) {
+  if (spinning || !entries.length) {
     return;
   }
 
@@ -302,6 +386,7 @@ function startSpin() {
   setError("");
   setResultText("");
   remainingText.textContent = "";
+  remainingText.classList.add("hidden");
   hideWinnerModal();
   spinButton.disabled = true;
   stopSpinMusic();
@@ -312,43 +397,40 @@ function startSpin() {
   animateSpin(initialVelocity);
 }
 
-function buildWheel() {
-  const parsedItems = parseInput(itemInput.value);
-
-  if (parsedItems.length < 2) {
-    setError("Please provide at least 2 items.");
+async function buildWheel() {
+  const file = csvInput.files && csvInput.files[0];
+  if (!file) {
+    setError("Please upload a CSV file.");
     return;
   }
 
-  items = parsedItems;
+  if (!file.name.toLowerCase().endsWith(".csv")) {
+    setError("Only .csv files are allowed.");
+    return;
+  }
+
+  try {
+    const csvText = await readCsvFile(file);
+    const parsedEntries = parseCsvText(csvText);
+    if (parsedEntries.length < 2) {
+      setError("CSV must include at least 2 data rows.");
+      return;
+    }
+
+    entries = parsedEntries;
+  } catch (error) {
+    const message = error instanceof Error ? error.message : "CSV parsing failed.";
+    setError(message);
+    return;
+  }
+
   rotation = 0;
-  selectedItem = "";
+  selectedEntry = null;
   setError("");
+  setResultText("");
+  remainingText.textContent = `${entries.length} remaining`;
+  remainingText.classList.remove("hidden");
   drawWheel();
-  spinButton.disabled = false;
-  showMode(playMode);
-}
-
-function nextSpin() {
-  if (!selectedItem) {
-    return;
-  }
-
-  items = removeOneItem(items, selectedItem);
-  itemInput.value = items.join("\n");
-  selectedItem = "";
-  stopSpinMusic();
-
-  if (!items.length) {
-    hideWinnerModal();
-    drawWheel();
-    setError("Wheel is empty. Enter new items to continue.");
-    showMode(setupMode);
-    return;
-  }
-
-  drawWheel();
-  hideWinnerModal();
   spinButton.disabled = false;
   showMode(playMode);
 }
@@ -361,11 +443,12 @@ function restart() {
   revealSound.pause();
   revealSound.currentTime = 0;
   spinning = false;
-  selectedItem = "";
-  items = [];
+  selectedEntry = null;
+  entries = [];
   rotation = 0;
   setResultText("");
   remainingText.textContent = "";
+  remainingText.classList.add("hidden");
   setError("");
   hideWinnerModal();
   confettiCtx.clearRect(0, 0, confettiCanvas.width, confettiCanvas.height);
@@ -376,8 +459,7 @@ function restart() {
 
 startButton.addEventListener("click", buildWheel);
 spinButton.addEventListener("click", startSpin);
-nextSpinButton.addEventListener("click", nextSpin);
-restartButton.addEventListener("click", restart);
+restartLink.addEventListener("click", restart);
 closeWinnerModalButton.addEventListener("click", hideWinnerModal);
 window.addEventListener("resize", resizeConfettiCanvas);
 

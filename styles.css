@@ -74,6 +74,16 @@ textarea {
   font-size: 1rem;
 }
 
+input[type="file"] {
+  width: 100%;
+  border-radius: 10px;
+  border: 1px solid rgba(151, 177, 255, 0.35);
+  background: #050a1d;
+  color: var(--text);
+  padding: 0.6rem;
+  font-size: 0.95rem;
+}
+
 button {
   border: 0;
   border-radius: 999px;
@@ -167,16 +177,16 @@ canvas {
   display: none;
 }
 
-.result {
-  font-size: 2rem;
-  font-weight: 800;
-  margin: 0.5rem 0;
-  color: #ffffff;
-}
-
 .remaining,
 .error {
   color: var(--muted);
+}
+
+.previous-prize {
+  margin: 0.4rem 0 0.35rem;
+  font-size: clamp(1rem, 2vw, 1.25rem);
+  font-weight: 700;
+  color: #f2f6ff;
 }
 
 .error {
@@ -189,6 +199,25 @@ canvas {
   font-size: 0.78rem;
   line-height: 1.35;
   color: #9fb2f1;
+}
+
+.footer-actions {
+  margin: 0.35rem 0 0;
+  text-align: center;
+}
+
+.restart-link {
+  background: transparent;
+  border: 0;
+  color: #b9c9ff;
+  font-size: 0.82rem;
+  padding: 0.15rem 0.25rem;
+  text-decoration: underline;
+  text-underline-offset: 2px;
+}
+
+.restart-link:hover {
+  color: #ffffff;
 }
 
 .winner-modal {
@@ -286,6 +315,16 @@ canvas {
     0 6px 0 rgba(8, 16, 44, 0.7),
     0 16px 30px rgba(1, 4, 16, 0.8);
   word-break: break-word;
+}
+
+.winner-description {
+  margin: 0;
+  max-width: 90%;
+  justify-self: center;
+  font-size: clamp(1rem, 2.2vw, 1.45rem);
+  line-height: 1.35;
+  color: #ecf2ff;
+  text-shadow: 0 6px 18px rgba(1, 4, 16, 0.45);
 }
 
 .confetti-canvas {
