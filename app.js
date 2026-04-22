@@ -32,7 +32,7 @@ const BASE_COLORS = [
   "#000000"
 ];
 
-const SPIN_MUSIC_URL = "https://commons.wikimedia.org/wiki/Special:FilePath/Musopen_-_In_the_Hall_Of_The_Mountain_King.ogg";
+const SPIN_MUSIC_URL = "./assets/phatplamet.mp3";
 const REVEAL_SOUND_URL = "https://commons.wikimedia.org/wiki/Special:FilePath/CullamBruce-Lockhart--Dawning_Fanfare.oga";
 
 let items = [];
