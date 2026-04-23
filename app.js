@@ -33,6 +33,7 @@ const BASE_COLORS = [
 
 const SPIN_MUSIC_URL = "./assets/phatplamet.mp3";
 const REVEAL_SOUND_URL = "https://commons.wikimedia.org/wiki/Special:FilePath/CullamBruce-Lockhart--Dawning_Fanfare.oga";
+const DEFAULT_CSV_URL = "./assets/LERFC%202026%20End%20Of%20Season%20-%20Court.csv";
 
 let entries = [];
 let rotation = 0;
@@ -417,13 +418,16 @@ async function buildWheel() {
       return;
     }
 
-    entries = parsedEntries;
+    applyEntries(parsedEntries);
   } catch (error) {
     const message = error instanceof Error ? error.message : "CSV parsing failed.";
     setError(message);
     return;
   }
+}
 
+function applyEntries(newEntries) {
+  entries = newEntries;
   rotation = 0;
   selectedEntry = null;
   setError("");
@@ -433,6 +437,25 @@ async function buildWheel() {
   drawWheel();
   spinButton.disabled = false;
   showMode(playMode);
+}
+
+async function loadDefaultCsv() {
+  try {
+    const response = await fetch(DEFAULT_CSV_URL, { cache: "no-store" });
+    if (!response.ok) {
+      throw new Error("Default CSV not found.");
+    }
+    const csvText = await response.text();
+    const parsedEntries = parseCsvText(csvText);
+    if (parsedEntries.length < 2) {
+      throw new Error("Default CSV must include at least 2 data rows.");
+    }
+    applyEntries(parsedEntries);
+  } catch (error) {
+    const message = error instanceof Error ? error.message : "Unable to load default CSV.";
+    setError(`${message} You can still upload a CSV manually.`);
+    showMode(setupMode);
+  }
 }
 
 function restart() {
@@ -465,3 +488,4 @@ window.addEventListener("resize", resizeConfettiCanvas);
 
 drawWheel();
 resizeConfettiCanvas();
+loadDefaultCsv();
